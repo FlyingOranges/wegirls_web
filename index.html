@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>We Girls</title>
+		<link href="./css/mui.min.css" rel="stylesheet" />
+		<link href="./css/showLoading.css" rel="stylesheet" />
+		<style type="text/css">
+			.mui-content>.mui-table-view:first-child {
+				margin-top: 0px;
+			}
+			
+			.mui-span-icon {
+				height: 41px;
+				line-height: 41px;
+			}
+			
+			.mui-table-view.mui-grid-view .mui-table-view-cell .mui-media-body {
+				height: 20px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">We Girls</h1>
+		</header>
+
+		<div class="mui-content" id="pullrefresh">
+
+			<ul class="mui-table-view mui-grid-view mui-grid-9 title-list-class" id="title-list">
+				<!--
+                	作者：aileshang0226@163.com
+                	时间：2018-07-18
+                	描述：标题内容区
+                -->
+				<!--<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
+					<a href="home.html?萌妹&amp;cute">
+						<span class="mui-icon mui-icon-personadd-filled"></span>
+						<div class="mui-media-body">萌妹</div>
+					</a>
+				</li>-->
+			</ul>
+		</div>
+	</body>
+
+	<script src="./js/mui.min.js"></script>
+	<script src="./js/showLoading.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		mui.init({
+			pullRefresh: {
+				container: '#pullrefresh',
+				down: {
+					style: 'circle',
+					callback: callbackList
+				},
+				up: {
+					auto: false,
+					contentrefresh: '正在加载...',
+					callback: callbackList
+				}
+			}
+		});
+
+		// 监听tap事件，解决 a标签 不能跳转页面问题
+		mui('body').on('tap', 'a', function() {
+			document.location.href = this.href;
+		});
+
+		function callbackList() {
+			setTimeout(function() {
+				getTagsList();
+				mui('#pullrefresh').pullRefresh().endPulldownToRefresh();
+			}, 1500);
+		}
+
+		window.onload = function() {
+			//加载文字和类型，plus环境中类型为div时强制以div方式显示
+			mui.showLoading("正在加载..", "div");
+
+			//获取数据信息
+			getTagsList();
+		};
+
+		//服务端获取tags列表信息
+		var getTagsList = function() {
+			//获取动态标题栏
+			mui.ajax('https://www.pengsongyang.com/tags', {
+				data: {
+					requestToken: 'b8b0bf7b028b5acdc5c170513e38d5ee'
+				},
+				dataType: 'json', //服务器返回json格式数据
+				type: 'get', //HTTP请求类型
+				success: function(data) {
+					//隐藏loding后的回调函数
+					mui.hideLoading(function() {
+						if(data.code != 0) {
+							mui.alert(data.message, '提示', function() {
+								console.log('你刚关闭了警告框');
+							});
+						} else {
+							//服务器返回响应，根据响应结果，执行操作
+							titleList(data);
+						}
+					});
+				},
+				error: function(xhr, type, errorThrown) {
+					//异常处理；
+					console.log(type);
+				}
+			});
+		}
+
+		//回传内容打印到页面上
+		var titleList = function(data) {
+			var list = document.getElementById("title-list");
+			var html = "";
+			var db = data.data;
+			for(var i = 0; i < db.length; i++) {
+				var objects = db[i];
+				var li =
+					"<li class='mui-table-view-cell mui-col-xs-4 mui-col-sm-3'>" +
+					"<a href='home.html?" + objects.title + "&" + objects.href + "'>" +
+					"<span class=''></span>" +
+					"<div class='mui-media-body'>" + objects.title + "</div></a></li>";
+				html += li;
+			}
+			list.innerHTML = html;
+		}
+	</script>
+
+</html>

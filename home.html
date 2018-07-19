@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>We Girls</title>
+		<link href="./css/mui.min.css" rel="stylesheet" />
+		<link href="./css/showLoading.css" rel="stylesheet" />
+
+		<style>
+			h5 {
+				padding-top: 8px;
+				padding-bottom: 8px;
+				text-indent: 12px;
+			}
+			
+			.mui-table-view.mui-grid-view .mui-table-view-cell .mui-media-body {
+				font-size: 15px;
+				margin-top: 8px;
+				color: #333;
+			}
+			
+			.mui-content>.mui-table-view:first-child {
+				margin-top: 0px;
+			}
+			
+			input,
+			button,
+			.mui-btn {
+				margin: 5px 15px 10px 5px;
+			}
+			
+			.mui-spinner {
+				display: inline-block;
+				width: 24px;
+				height: 24px;
+				-webkit-transform-origin: 50%;
+				transform-origin: 50%;
+				-webkit-animation: spinner-spin 1s step-end infinite;
+				animation: spinner-spin 1s step-end infinite;
+			}
+			
+			.mui-spinner:after {
+				display: block;
+				content: "";
+				width: 100%;
+				height: 100%;
+				background-position: 50%;
+				background-size: 100%;
+				background-repeat: no-repeat;
+			}
+			
+			.mui-spinner-custom:after {
+				background-image: url("data:image/svg+xml;charset=utf-8,<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><defs><line id='l' x1='60' x2='60' y1='7' y2='27' stroke='red' stroke-width='11' stroke-linecap='round'/></defs><g><use xlink:href='%23l' opacity='.27'/><use xlink:href='%23l' opacity='.27' transform='rotate(30 60,60)'/><use xlink:href='%23l' opacity='.27' transform='rotate(60 60,60)'/><use xlink:href='%23l' opacity='.27' transform='rotate(90 60,60)'/><use xlink:href='%23l' opacity='.27' transform='rotate(120 60,60)'/><use xlink:href='%23l' opacity='.27' transform='rotate(150 60,60)'/><use xlink:href='%23l' opacity='.37' transform='rotate(180 60,60)'/><use xlink:href='%23l' opacity='.46' transform='rotate(210 60,60)'/><use xlink:href='%23l' opacity='.56' transform='rotate(240 60,60)'/><use xlink:href='%23l' opacity='.66' transform='rotate(270 60,60)'/><use xlink:href='%23l' opacity='.75' transform='rotate(300 60,60)'/><use xlink:href='%23l' opacity='.85' transform='rotate(330 60,60)'/></g></svg>");
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav header-image">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title" id="title-tag">we grils</h1>
+			<a id="refresh" class="mui-icon mui-icon mui-icon-loop mui-pull-right"></a>
+		</header>
+		<div class="mui-content" id="pullrefresh" style="background-color:#fff">
+			<ul class="mui-table-view mui-grid-view" id="image-list">
+				<!--
+                	作者：aileshang0226@163.com
+                	时间：2018-07-18
+                	描述：图片内容区
+                -->
+				<!--<li class="mui-table-view-cell mui-media mui-col-xs-6">
+					<a href="#">
+						<img class="mui-media-object" src="./images/shuijiao.jpg">
+						<div class="mui-media-body">幸福就是可以一起睡觉</div>
+					</a>
+				</li>-->
+
+			</ul>
+		</div>
+
+		<!--mui-icon mui-icon-more-->
+		<!--<button type="button" class="mui-btn mui-btn-success mui-btn-block mui-btn-outlined">Block button</button>-->
+		<button type="button" id="more-btn" class="mui-btn mui-btn-primary mui-btn-block" data-loading-icon="mui-spinner mui-spinner-custom">
+			加载更多
+		</button>
+	</body>
+	<script src="./js/mui.min.js"></script>
+	<script src="./js/showLoading.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		mui.init();
+
+		var href;
+		window.onload = function() {
+
+			var perimeters = window.location.search;
+			var title = decodeURI(perimeters.substr(1).split('&')[0]);
+			href = decodeURI(perimeters.substr(1).split('&')[1]);
+			document.getElementById("title-tag").innerHTML = title;
+
+			lodingData(href);
+		}
+
+		document.getElementById('refresh').addEventListener('click', function() {
+			lodingData(href);
+		});
+
+		var lodingData = function(href) {
+			//加载文字和类型，plus环境中类型为div时强制以div方式显示
+			mui.showLoading("正在加载..", "div");
+
+			getList(href);
+		};
+
+		var getList = function(href, page = 1) {
+			mui.ajax('https://www.pengsongyang.com/girls', {
+				data: {
+					c: href,
+					p: page,
+					m: '',
+					requestToken: 'b8b0bf7b028b5acdc5c170513e38d5ee'
+				},
+				dataType: 'json', //服务器返回json格式数据
+				type: 'get', //HTTP请求类型
+				success: function(data) {
+					//隐藏loding后的回调函数
+					mui.hideLoading(function() {
+						if(data.code != 0) {
+							mui.alert(data.message, '提示', function() {
+								console.log('你刚关闭了警告框');
+							});
+						} else {
+							//服务器返回响应
+							imageItem(data);
+						}
+
+					});
+				},
+				error: function(xhr, type, errorThrown) {
+					//异常处理；
+					console.log(type);
+				}
+			});
+		};
+
+		var imageItem = function(data) {
+			var list = document.getElementById("image-list");
+			var db = data.data;
+			var html = "";
+			for(var i = 0; i < db.length; i++) {
+				var objects = db[i];
+				var li =
+					"<li class='mui-table-view-cell mui-media mui-col-xs-6'>" +
+					"<a href='info.html?" + objects.alt + "&" + objects.href + "'>" +
+					"<img class='mui-media-object' src='" + objects.thumbSrc + "'>" +
+					"<div class='mui-media-body'>" + objects.alt + "</div></a></li>";
+				html += li;
+			}
+
+			list.innerHTML = html;
+		};
+
+		var loding_page = 1;
+		//点击加载更多...
+		document.getElementById('more-btn').addEventListener('click', function() {
+			mui.showLoading("正在加载更多..", "div");
+			++loding_page;
+
+			mui.ajax('https://www.pengsongyang.com/girls', {
+				data: {
+					c: href,
+					p: loding_page,
+					m: '',
+					requestToken: 'b8b0bf7b028b5acdc5c170513e38d5ee'
+				},
+				dataType: 'json', //服务器返回json格式数据
+				type: 'get', //HTTP请求类型
+				success: function(data) {
+					mui.hideLoading(function() {
+						if(data.data.length == 0) {
+							mui.message("没有更多的数据");
+						} else {
+							imageAddList(data);
+						}
+					});
+
+				},
+				error: function(xhr, type, errorThrown) {
+					//异常处理；
+					console.log(type);
+				}
+			});
+		});
+
+		var imageAddList = function(data) {
+			var list = document.getElementById("image-list");
+			var db = data.data;
+			var html = "";
+			for(var i = 0; i < db.length; i++) {
+				var objects = db[i];
+				var li =
+					"<li class='mui-table-view-cell mui-media mui-col-xs-6'>" +
+					"<a href='info.html?" + objects.alt + "&" + objects.href + "'>" +
+					"<img class='mui-media-object' src='" + objects.thumbSrc + "'>" +
+					"<div class='mui-media-body'>" + objects.alt + "</div></a></li>";
+				html += li;
+			}
+
+			list.insertAdjacentHTML('beforeend', html);
+		};
+	</script>
+
+</html>
